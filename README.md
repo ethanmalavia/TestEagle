@@ -53,7 +53,7 @@ Some records were also entered manually by the team where web data was incomplet
 
 | Name | Role |
 |------|------|
-| Krish Shah | Team Lead, Database Architect |
+| Krish Shah | Requirements Gathering, Database Architect |
 | Nolan Stillwell | ArcGIS Implemnetation & Data Population |
 | Ethan Malviala | Query Development and Documentation |
 
