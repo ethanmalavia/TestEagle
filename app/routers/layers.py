@@ -1,16 +1,17 @@
 """
-GIS layer endpoints — each returns a GeoJSON FeatureCollection.
+GIS layer endpoints.
 
-Add these as GeoJSON Feature Layers in ArcGIS Online:
-  Map Viewer → Add → Add layer from URL → paste the full endpoint URL.
-
-ArcGIS will poll the URL and render the features using its default renderer.
-You can then configure symbology, popups, and labeling in Map Viewer.
+GeoJSON endpoints for programmatic use.
+CSV endpoint for ArcGIS Online live layer consumption:
+  Map Viewer → Add → Add layer from URL → paste /layers/points.csv
+  ArcGIS auto-detects latitude/longitude columns and renders live points.
 """
+import csv
+import io
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import Response
-from app.data.mock import MockStore
+from app.data.csv_store import CSVStore
 from app.dependencies import get_store
 from app.models.geojson import GeoJSONFeatureCollection
 from app.services.geojson import build_area_layer, build_point_layer, build_road_layer
@@ -66,7 +67,49 @@ def get_road_layer(
 )
 def get_area_layer(
     project_id: Optional[int] = Query(None),
-    store: MockStore = Depends(get_store),
+    store: CSVStore = Depends(get_store),
 ):
     fc = build_area_layer(store, project_id=project_id)
     return Response(content=fc.model_dump_json(), media_type=_GEO_MEDIA)
+
+
+@router.get(
+    "/points.csv",
+    summary="Point layer as CSV — for ArcGIS Online live layer",
+    description=(
+        "Returns all project locations as CSV with latitude/longitude columns. "
+        "Add to ArcGIS Online via Map Viewer → Add → Add layer from URL. "
+        "ArcGIS auto-detects the coordinate columns and renders live points."
+    ),
+)
+def get_point_layer_csv(
+    project_id: Optional[int] = Query(None),
+    store: CSVStore = Depends(get_store),
+):
+    locations = store.get_locations(project_id=project_id)
+    projects = {p["project_id"]: p for p in store.get_projects()}
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        "location_id", "location_name", "location_type", "address",
+        "project_name", "project_status", "meeting_count", "latitude", "longitude",
+    ])
+    for loc in locations:
+        if loc["latitude"] is None or loc["longitude"] is None:
+            continue
+        proj = projects.get(loc["project_id"], {})
+        meetings = store.get_meetings(project_id=loc["project_id"])
+        writer.writerow([
+            loc["location_id"],
+            loc["location_name"],
+            loc["location_type"],
+            loc["address"],
+            proj.get("project_name", ""),
+            proj.get("status", ""),
+            len(meetings),
+            loc["latitude"],
+            loc["longitude"],
+        ])
+
+    return Response(content=buf.getvalue(), media_type="text/csv")
