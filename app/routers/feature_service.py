@@ -28,13 +28,26 @@ _FIELDS = [
 ]
 
 
+_EXTENT = {
+    "xmin": -81.90, "ymin": 26.35,
+    "xmax": -81.70, "ymax": 26.55,
+    "spatialReference": _SPATIAL_REF,
+}
+
+
 @router.get("/FeatureServer")
 def feature_server_info():
     return JSONResponse({
         "currentVersion": 10.81,
         "serviceDescription": "Estero Village Project Locations",
+        "type": "Feature Service",
+        "capabilities": "Query",
         "layers": [{"id": 0, "name": "Locations", "type": "Feature Layer"}],
         "spatialReference": _SPATIAL_REF,
+        "initialExtent": _EXTENT,
+        "fullExtent": _EXTENT,
+        "supportedQueryFormats": "JSON",
+        "maxRecordCount": 1000,
     })
 
 
@@ -47,8 +60,18 @@ def layer_info():
         "type": "Feature Layer",
         "geometryType": "esriGeometryPoint",
         "spatialReference": _SPATIAL_REF,
+        "objectIdField": "OBJECTID",
+        "displayField": "location_name",
         "fields": _FIELDS,
         "capabilities": "Query",
+        "maxRecordCount": 1000,
+        "supportedQueryFormats": "JSON",
+        "extent": _EXTENT,
+        "hasAttachments": False,
+        "htmlPopupType": "esriServerHTMLPopupTypeNone",
+        "isDataVersioned": False,
+        "supportsStatistics": False,
+        "supportsAdvancedQueries": False,
     })
 
 
