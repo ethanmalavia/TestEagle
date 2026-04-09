@@ -10,7 +10,7 @@ class Settings:
     # Populated from .env when you connect to Supabase
     database_url: str = os.getenv("DATABASE_URL", "")
     supabase_url: str = os.getenv("SUPABASE_URL", "")
-    supabase_key: str = os.getenv("SUPABASE_KEY", "")
+    supabase_key: str = os.getenv("SUPABASE_SERVICE_KEY", os.getenv("SUPABASE_KEY", ""))
 
     # CORS — tighten this to your ArcGIS domain in production
     allowed_origins: list[str] = os.getenv("ALLOWED_ORIGINS", "*").split(",")

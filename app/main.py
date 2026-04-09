@@ -33,7 +33,11 @@ def root():
         "version": settings.app_version,
         "docs": "/docs",
         "export": {
-            "locations_csv": f"{settings.api_v1_prefix}/export/locations.csv",
+            "projects_csv":      f"{settings.api_v1_prefix}/export/projects.csv",
+            "meeting_types_csv": f"{settings.api_v1_prefix}/export/meeting_types.csv",
+            "meetings_csv":      f"{settings.api_v1_prefix}/export/meetings.csv",
+            "locations_csv":     f"{settings.api_v1_prefix}/export/locations.csv",
+            "documents_csv":     f"{settings.api_v1_prefix}/export/documents.csv",
         },
     }
 
